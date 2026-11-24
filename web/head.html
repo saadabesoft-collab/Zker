@@ -8,6 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
+<script>window.QDATA=null</script>
 <style>
 /* VOICE: هادي، خاشع، واضح — تطبيق بيفكّرك بربنا من غير زحمة
    IDEA: محراب ونافذة سماء؛ لون السماء بيتغير مع المواسم (عادي، رمضان، العشر الأواخر، العيد)
@@ -166,6 +167,57 @@ textarea{width:100%;min-height:120px;background:var(--soft);border:1px solid var
 .brand{text-align:center;color:var(--muted);font-size:13px;padding:22px 0 8px;letter-spacing:.04em}
 .brand b{font-family:"Reem Kufi";font-size:16px;color:var(--acc);letter-spacing:.02em}
 @media(max-width:420px){.times button{font-size:12px}.times button b{font-size:13.5px}.qhead{grid-template-columns:120px minmax(0,1fr)}.qhead .ring b{font-size:26px}}
+
+@font-face{font-family:"Amiri Quran";src:url(fonts/AmiriQuran.ttf) format("truetype");font-display:swap}
+.hero2{position:relative;overflow:hidden;color:#fff;min-height:372px;padding-top:env(safe-area-inset-top)}
+.hero2 .scene{position:absolute;inset:0;width:100%;height:100%}
+.hcont{position:relative;z-index:2;padding-top:14px}
+.appn{font-family:"Reem Kufi";font-size:22px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.25)}
+.hero2 .next{margin:8px 0 0;text-align:center;text-shadow:0 2px 12px rgba(0,0,0,.3)}
+.hero2 .next small{font-family:"Reem Kufi";font-size:21px;opacity:1;word-spacing:.35em}
+.hero2 .cd{font-size:clamp(46px,14vw,66px);color:#fff;font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums}
+.hero2 .nm{font-size:15px;font-family:inherit;opacity:.95}
+.sheet{background:var(--card);border-radius:26px 26px 0 0;margin-top:-30px;position:relative;z-index:3;box-shadow:0 -6px 20px rgba(0,0,0,.08)}
+.datebar{display:flex;align-items:center;gap:6px;padding:12px 12px 8px;border-bottom:1px solid var(--line)}
+.dtxt{flex:1;text-align:center;line-height:1.35}.dtxt b{display:block;font-family:"Reem Kufi";font-size:17px}.dtxt span{font-size:13px;color:var(--muted)}
+.ib{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none}
+.ib svg{width:22px;height:22px;fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ib.light svg{stroke:#fff}
+.ptimes{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;padding:10px 6px;background:var(--soft)}
+.ptimes button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;border-radius:14px;font-size:13px;color:var(--ink);position:relative}
+.ptimes button .pi{width:38px;height:38px;border-radius:50%;background:var(--card);display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.ptimes button .pi svg{width:26px;height:26px}
+.ptimes button b{font-size:14px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ptimes button.on{background:var(--card);box-shadow:inset 0 0 0 2px var(--acc)}
+.ptimes button.prayed::after{content:"";position:absolute;top:4px;left:8px;width:9px;height:9px;border-radius:50%;background:var(--ok)}
+.night{display:flex;gap:10px;justify-content:center;padding:4px 10px 14px;background:var(--soft);border-radius:0 0 0 0;flex-wrap:wrap}
+.night span{background:var(--card);border-radius:99px;padding:6px 14px;font-size:14px}.night b{color:var(--acc);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 6px;padding:18px 8px}
+.grid button{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13.5px;font-weight:600;text-align:center;line-height:1.25}
+.fi{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.fi svg{width:30px;height:30px}
+.ch{display:flex;gap:12px;align-items:center}
+.ci{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ci svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mush{background:light-dark(#fffdf6,#14191a);border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin-top:14px}
+.qtext{font-family:"Amiri Quran",Amiri,serif;font-size:23px;line-height:2.35;text-align:justify;text-align-last:center;color:var(--ink)}
+.qtext .an{font-family:"Amiri Quran",Amiri;color:var(--green);font-size:.95em;margin:0 2px}
+.shead{margin:10px 0 6px;text-align:center;border:2px solid var(--acc);border-radius:14px;padding:6px;font-family:"Reem Kufi";font-size:19px;color:var(--acc);background:var(--soft)}
+.basm{text-align:center;font-family:"Amiri Quran",Amiri;font-size:22px;margin:4px 0 8px}
+.mnav{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.compass{width:min(78vw,300px);aspect-ratio:1;margin:18px auto;position:relative}
+.compass svg{width:100%;height:100%}
+.slist .row{padding:10px 0;border-top:1px solid var(--line)}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.kv input{width:100%}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}
+.cal div{padding:6px 0;border-radius:10px;font-size:13px;min-height:52px}
+.cal .hd{font-weight:600;color:var(--muted);min-height:auto}
+.cal .d b{display:block;font-size:17px;font-family:"Reem Kufi"}.cal .d span{font-size:10px;color:var(--muted)}
+.cal .f{background:color-mix(in srgb,var(--acc) 16%,transparent)}.cal .x{background:color-mix(in srgb,var(--warn) 16%,transparent)}
+.cal .t{outline:2px solid var(--green)}
+.rep{display:grid;grid-template-columns:90px repeat(7,minmax(0,1fr));gap:4px;align-items:center;font-size:12px}
+.rep i{display:block;height:22px;border-radius:6px;background:var(--line)}
 </style>
 </head>
 <body>
@@ -180,31 +232,44 @@ textarea{width:100%;min-height:120px;background:var(--soft);border:1px solid var
 
 <!-- HOME -->
 <section class="view on" id="v-home">
-  <header class="hero">
-    <div class="wrap">
+  <header class="hero2" id="hero">
+    <svg class="scene" id="scene" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+    <div class="wrap hcont">
       <div class="top">
-        <div class="brandrow"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#logo"/></svg><div><b id="hDate"></b><span id="gDate"></span></div></div>
+        <div class="brandrow"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#logo"/></svg><b class="appn">ذِكْر</b></div>
         <button class="city" id="cityBtn"></button>
       </div>
       <div class="next">
         <small id="nextLbl">الصلاة الجاية</small>
-        <div class="nm" id="nextName">—</div>
         <div class="cd" id="nextCd">--:--:--</div>
+        <div class="nm" id="nextName">—</div>
       </div>
     </div>
-    <svg class="sky" id="sky" viewBox="0 0 400 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
   </header>
+  <div class="sheet">
+    <div class="datebar"><button class="ib" id="dayPrev" aria-label="اليوم اللي قبله"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+      <div class="dtxt"><b id="hDate"></b><span id="gDate"></span></div>
+      <button class="ib" id="dayNext" aria-label="اليوم اللي بعده"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button class="ib" id="shareTimes" aria-label="شارك المواقيت"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.9l7.6-4.3M8.2 13.1l7.6 4.3"/></svg></button></div>
+    <div class="ptimes" id="times"></div>
+    <div class="night" id="nightRow"></div>
+  </div>
   <div class="wrap">
-    <div class="times" id="times"></div>
-    <p class="hint">دوس على الصلاة بعد ما تصليها عشان تتعلّم</p>
+    <div id="travelCard"></div>
     <div id="permCard"></div>
-    <div id="seasonCard" class="sec"></div>
-    <div class="sec"><h2>مهام النهارده</h2><div class="card" id="tasks"></div></div>
-    <div class="sec"><h2>حديث اليوم</h2><div class="card" id="hadithDay"></div></div>
-    <div class="sec"><h2>الصيام الجاي</h2><div class="card" id="nextFast"></div></div>
-    <div class="sec"><h2>ذكر اللحظة</h2><button class="card z" id="dhikrNow" style="text-align:center"></button></div>
+    <div class="card grid" id="fgrid"></div>
+    <div id="seasonCard"></div>
+    <div class="card"><div class="ch"><span class="ci" style="background:#5a1f5c"><svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg></span><div><h3>عمل اليوم والليلة</h3><div class="muted">ورد المحاسبة — <span id="dPct"></span></div></div></div><div class="bar" style="margin:10px 0 4px"><i id="dBar"></i></div><div id="tasks"></div></div>
+    <div class="card"><div class="ch"><span class="ci" style="background:#1aa0c8"><svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0-3.5 10.9V17h7v-3.1A6 6 0 0 0 12 3zM10 20h4"/></svg></span><div><h3>حديث اليوم</h3><div class="muted">من صحيحي البخاري ومسلم</div></div></div><div id="hadithDay" style="margin-top:10px"></div></div>
+    <div class="card"><div class="ch"><span class="ci" style="background:#1d6f8f"><svg viewBox="0 0 24 24"><path d="M15 3a8 8 0 1 0 6 13A7 7 0 0 1 15 3z"/></svg></span><div><h3>الصيام الجاي</h3></div></div><div id="nextFast" style="margin-top:6px"></div></div>
+    <button class="card z" id="dhikrNow" style="text-align:center"></button>
     <footer class="brand">تطوير <b>BeSoft</b> · صدقة جارية</footer>
   </div>
+</section>
+
+<section class="view" id="v-page">
+  <div class="vh"><div class="wrap row" style="flex-wrap:nowrap"><button class="ib light" id="pBack" aria-label="رجوع"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button><div class="sp"><h1 id="pTitle"></h1><p id="pSub"></p></div></div></div>
+  <div class="wrap"><div id="pBody"></div><footer class="brand">تطوير <b>BeSoft</b></footer></div>
 </section>
 
 <section class="view" id="v-azkar">
@@ -222,6 +287,11 @@ textarea{width:100%;min-height:120px;background:var(--soft);border:1px solid var
   <div class="wrap"><div id="fBody"></div><footer class="brand">تطوير <b>BeSoft</b></footer></div>
 </section>
 
+<section class="view" id="v-more">
+  <div class="vh"><div class="wrap"><h1>المزيد</h1><p>كل مميزات ذِكْر في مكان واحد</p></div></div>
+  <div class="wrap"><div class="card grid sec" id="mgrid"></div><footer class="brand">تطوير <b>BeSoft</b> · صدقة جارية</footer></div>
+</section>
+
 <section class="view" id="v-set">
   <div class="vh"><div class="wrap"><h1>الإعدادات</h1><p>كل حاجة هنا بتتحفظ على جهازك</p></div></div>
   <div class="wrap"><div id="sBody"></div><footer class="brand">تطوير <b>BeSoft</b> · صدقة جارية</footer></div>
@@ -232,7 +302,7 @@ textarea{width:100%;min-height:120px;background:var(--soft);border:1px solid var
   <button data-v="azkar"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="17" cy="9" r="2"/><circle cx="17" cy="15" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="7" cy="15" r="2"/><circle cx="7" cy="9" r="2"/></svg>الأذكار</button>
   <button data-v="quran"><svg viewBox="0 0 24 24"><path d="M12 6c-2-1.5-5-2-8-1.5v14c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-14c-3-.5-6 0-8 1.5z"/><path d="M12 6v14"/></svg>القرآن</button>
   <button data-v="fast"><svg viewBox="0 0 24 24"><path d="M15 3a8 8 0 1 0 6 13A7 7 0 0 1 15 3z"/></svg>الصيام</button>
-  <button data-v="set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>الإعدادات</button>
+  <button data-v="more"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>المزيد</button>
 </nav>
 
 <script>/*ADHAN*/</script>

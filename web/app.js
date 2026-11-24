@@ -39,9 +39,9 @@ const KEY='zikr-app-v1';
 const DEF={loc:{name:'الإسكندرية',lat:31.2001,lng:29.9187,tz:'Africa/Cairo',method:'Egyptian'},autoLoc:true,locAt:0,hOff:0,season:'auto',
  n:{prayer:true,before:10,adhan:true,muezzin:'abdulbasit',morning:true,mAfter:30,evening:true,eAfter:30,wird:true,wTime:'20:00',repeat:15,
     fast:true,fTime:'21:00',suhoor:true,sBefore:45,kahf:true,kTime:'10:00',dhikr:true,dEvery:120,qFrom:'23:00',qTo:'08:00',qiyam:false,duha:false,
-    sadaqa:true,sdTime:'11:00',voice:true,voiceHadith:false,dhikrVoice:true,loud:true,
+    sadaqa:true,sdTime:'11:00',fajrAlarm:false,fajrBefore:20,fajrSound:'adhan',voice:true,voiceHadith:false,dhikrVoice:true,loud:true,
     types:{monthu:true,white:true,special:true,shawwal:true}},
- wird:{page:0,end:null,mode:'date',ppd:20,khatmas:0,log:{}},az:{},azDone:{},prayed:{},plan:{},fasted:{},sadaqa:{},qada:0,shawwal:0,ack:{},shown:{},tas:{n:0,target:33,total:0}};
+ wird:{page:0,end:null,mode:'date',ppd:20,khatmas:0,log:{}},az:{},azDone:{},prayed:{},plan:{},fasted:{},sadaqa:{},deeds:{},sbank:[],home:null,mushaf:0,zk:{},cur:'ج.م',sgoal:0,qada:0,shawwal:0,ack:{},shown:{},tas:{n:0,target:33,total:0}};
 let S;
 try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){S=null}
 S=merge(structuredClone(DEF),S||{});
@@ -115,11 +115,12 @@ function addPages(n){const W=S.wird;n=Math.round(n);if(!n)return;W.log[T]=Math.m
 const azDone=(k,t)=>!!(S.azDone[k]&&S.azDone[k][t]);
 function evts(k){const E=[],N=S.n,p=pt(k),sea=seasonOf(k),h=sea.h,w=dow(k),seed=ymd(k)[2];
  const add=(id,time,title,body,o={})=>E.push({id:id+'@'+k,k,kind:o.kind||id,time,title,body,persist:!!o.persist,exp:o.exp||time+15*6e4,act:o.act||null,actionLabel:o.al||'',soft:!!o.soft,
-   speech:o.sp||'',hk:o.hk||'',sound:o.sound||'tts',adhanFile:o.af||'',kindLabel:o.kl||'تذكير'});
+   speech:o.sp||'',hk:o.hk||'',sound:o.sound||'tts',adhanFile:o.af||'',kindLabel:o.kl||'تذكير',rep:o.rep||0});
  const mid=at(addD(k,1),'00:00')-6e4;
  for(const n of PRAYERS){const t=p[n];const lb=(n==='dhuhr'&&w===5)?'صلاة الجمعة':'صلاة '+PN[n];const lbMsa=(n==='dhuhr'&&w===5)?'صلاة الجمعة':'صلاة '+PN[n];
    if(N.prayer)add('pre-'+n,t-N.before*6e4,'فاضل '+AR(N.before)+' دقايق على '+lb,lb+' الساعة '+fmtT(t)+' — قوم اتوضّى وجهّز نفسك',{kind:'prayer',exp:t+20*6e4,sp:'بقي '+mins(N.before)+' على '+lbMsa+'، استعد للصلاة',hk:'prayer',kl:'الصلاة'});
    if(N.adhan)add('adhan-'+n,t,'حان الآن موعد أذان '+PN[n],'حيّ على الصلاة، حيّ على الفلاح',{kind:'adhan',exp:t+25*6e4,sound:'adhan',af:n==='fajr'?'adhan_fajr':'adhan_'+N.muezzin,hk:'prayer',kl:'الأذان'})}
+ if(N.fajrAlarm){const ft=p.fajr-N.fajrBefore*6e4;add('fajralarm',ft,'منبّه الفجر','الفجر الساعة '+fmtT(p.fajr)+' — قوم اتوضّى، الصلاة خير من النوم',{persist:1,exp:p.fajr+40*6e4,rep:5,sound:N.fajrSound==='tts'?'tts':'adhan',af:'adhan_fajr',sp:'الصلاة خير من النوم، قم لصلاة الفجر',hk:'prayer',kl:'منبّه الفجر'})}
  if(N.morning)add('morning',p.fajr+N.mAfter*6e4,'أذكار الصباح','ابدأ يومك بذكر الله — مش هتاخد ١٠ دقايق',{persist:1,exp:p.dhuhr,act:'az:m',al:'افتح الأذكار',sp:'حان وقت أذكار الصباح، حصّن يومك بذكر الله',hk:'azkar',kl:'الأذكار'});
  if(N.evening)add('evening',p.asr+N.eAfter*6e4,'أذكار المساء','حصّن نفسك قبل الليل',{persist:1,exp:mid,act:'az:e',al:'افتح الأذكار',sp:'حان وقت أذكار المساء',hk:'azkar',kl:'الأذكار'});
  if(N.wird){const w0=wird(),left=Math.max(0,w0.target-w0.done);add('wird',at(k,N.wTime),'وردك من القرآن','فاضلك '+AR(left)+' صفحة النهارده — من صفحة '+AR(w0.from+w0.done)+' (سورة '+SURAH[surahAt(Math.min(TOTAL,w0.from+w0.done))]+')',{persist:1,exp:mid,act:'quran',al:'افتح الورد',sp:'لا تنسَ وِردك من القرآن اليوم، بقي لك '+(left||w0.target)+' صفحة',hk:'quran',kl:'القرآن'})}
@@ -153,7 +154,7 @@ const hid=s=>{let h=5381;for(const c of s)h=((h<<5)+h+c.charCodeAt(0))|0;return 
 let nsT;function nsched(){if(!NATIVE)return;clearTimeout(nsT);nsT=setTimeout(()=>{try{const now=Date.now(),L=[];
  for(let i=-1;i<4;i++){const k=addD(T,i);for(const e of evts(k)){if(e.time<=now||S.ack[e.id]||doneFor(e))continue;L.push(e)}}
  L.sort((a,b)=>a.time-b.time);
- const items=L.slice(0,220).map(e=>({id:hid(e.id),key:e.id,time:e.time,exp:e.exp,title:e.title,body:e.body,persistent:e.persist,soft:e.soft,repeat:S.n.repeat,
+ const items=L.slice(0,220).map(e=>({id:hid(e.id),key:e.id,time:e.time,exp:e.exp,title:e.title,body:e.body,persistent:e.persist,soft:e.soft,repeat:e.rep||S.n.repeat,
    sound:e.sound==='adhan'?'adhan':(S.n.voice||e.soft)?e.sound:'none',adhanFile:e.adhanFile,speech:(e.speech||'')+(S.n.voiceHadith&&e.hadith?'. قال رسول الله صلى الله عليه وسلم: '+e.hadith:''),
    hadith:e.hadith,src:e.src,actionLabel:e.actionLabel,kindLabel:e.kindLabel,loud:S.n.loud}));
  Z.schedule({items}).catch(()=>{})}catch(err){console.log('nsched',err)}},1200)}
@@ -187,10 +188,10 @@ function engine(){const now=Date.now();const nk=keyOf(new Date(now));if(nk!==T){
  const list=due(now);let freshE=null;
  for(const e of list){const last=S.shown[e.id];
    if(!last){S.shown[e.id]=now;notify(e,false);if(!freshE)freshE=e;if(e.soft)setTimeout(()=>{if(!S.ack[e.id]){S.ack[e.id]=Date.now();save();renderPop()}},90e3)}
-   else if(!NATIVE&&e.persist&&now-last>=S.n.repeat*6e4){S.shown[e.id]=now;notify(e,true);if(!freshE)freshE=e}}
+   else if(!NATIVE&&e.persist&&now-last>=(e.rep||S.n.repeat)*6e4){S.shown[e.id]=now;notify(e,true);if(!freshE)freshE=e}}
  if(freshE){save();if(!document.hidden)soundFor(freshE)}renderPop()}
 function prune(){const lim=addD(T,-7);for(const o of[S.ack,S.shown])for(const id in o){const k=id.split('@')[1];if(k&&k<lim)delete o[id]}
- for(const o of[S.az,S.azDone,S.plan])for(const k in o)if(k<addD(T,-3))delete o[k];save()}
+ for(const o of[S.az,S.plan])for(const k in o)if(k<addD(T,-3))delete o[k];for(const o of[S.azDone,S.deeds,S.prayed])for(const k in o)if(k<addD(T,-60))delete o[k];save()}
 function doAct(e,fromNative){const a=e.act;if(!a){ack(e.id);return}
  if(a.startsWith('az:')){azTab=a.slice(3);go('azkar')}
  else if(a==='quran')go('quran');
@@ -232,58 +233,6 @@ function applyCoords(lat,lng,force){let best=null,bd=1e9;for(const c of CITIES){
 function locate(force){if(!force&&(!S.autoLoc||Date.now()-S.locAt<6*36e5))return;
  getCoords().then(c=>applyCoords(c.latitude,c.longitude,force)).catch(()=>{S.locAt=Date.now()-5*36e5;if(force)toast('مقدرتش أحدد مكانك — اسمح للبرنامج بالموقع أو اختار المدينة')})}
 
-/* ================= RENDER: HOME ================= */
-function nextPrayer(now){for(const k of[T,addD(T,1)]){const p=pt(k);for(const n of['fajr','sunrise','dhuhr','asr','maghrib','isha'])if(p[n]>now)return{n,t:p[n],k}}}
-function renderHome(){const sea=seasonOf(T);
- document.documentElement.dataset.season=sea.name;
- $('#hDate').textContent=hStr(hij(T));$('#gDate').textContent=fmtG(T,{weekday:'long',day:'numeric',month:'long'});
- $('#cityBtn').innerHTML='<svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'+esc(S.loc.name);
- const p=pt(T);const nx=nextPrayer(Date.now());const pr=S.prayed[T]||{};
- $('#times').innerHTML=['fajr','sunrise','dhuhr','asr','maghrib','isha'].map(n=>'<button data-p="'+n+'" class="'+(nx&&nx.k===T&&nx.n===n?'on ':'')+(pr[n]?'prayed':'')+'">'+PN[n]+'<b>'+fmtT(p[n]).replace(/\s?[صم]$/,'')+'</b></button>').join('');
- drawSky(sea.name);
- const P=NATIVE?{permission:'granted'}:window.Notification;
- $('#permCard').innerHTML=(!P||P.permission!=='granted')?'<div class="card sec" style="border-color:var(--acc)"><h3>فعّل الإشعارات</h3><p class="muted" style="margin:6px 0 10px">'+(P?'عشان أفكرك بالصلاة والأذكار والصيام حتى لو البرنامج مش قدامك.':'المتصفح ده مش بيدعم الإشعارات — التنبيهات هتظهر جوه البرنامج بس.')+'</p>'+(P&&P.permission!=='denied'?'<button class="btn blue" id="permBtn">فعّل الإشعارات</button>':P?'<p class="muted">الإشعارات مقفولة من إعدادات المتصفح.</p>':'')+'</div>':'';
- const w=wird();const fi=fastInfo(T);
- const tasks=[['m','أذكار الصباح',azDone(T,'m')?'خلصت، تقبّل الله':azCount('m')],['e','أذكار المساء',azDone(T,'e')?'خلصت، تقبّل الله':azCount('e')],
-  ['q','ورد القرآن',AR(Math.min(w.done,w.target))+' من '+AR(w.target)+' صفحة — من ص '+AR(w.from)+' لـ ص '+AR(w.to),w.ok],
-  ['s','صدقة اليوم',S.sadaqa[T]?'تقبّل الله منك':'ولو بشق تمرة — دوس لما تتصدق',!!S.sadaqa[T]]];
- if(!fi.forbidden&&fi.list.length)tasks.push(['f','صيام: '+fi.l,S.fasted[T]?'صايم — ربنا يتقبل':'لو صايم النهارده دوس هنا',!!S.fasted[T]]);
- $('#tasks').innerHTML=tasks.map(([id,t,s,ok])=>{ok=ok??azDone(T,id);return'<button class="task'+(ok?' done':'')+'" data-t="'+id+'"><span class="chk"></span><span class="sp"><span class="t">'+t+'</span><br><span class="s">'+s+'</span></span></button>'}).join('');
- const dn=diffD('2026-01-01',T);const hd=HALL[((dn%HALL.length)+HALL.length)%HALL.length];
- $('#hadithDay').innerHTML='<div class="hadith">«'+esc(hd[0])+'»</div><div class="src" style="margin-top:6px">'+esc(hd[1])+'</div>';
- let nf=[];for(let i=1;i<45&&nf.length<3;i++){const k=addD(T,i),f=fastInfo(k);if(!f.forbidden&&f.list.length&&wanted(f))nf.push([k,f])}
- $('#nextFast').innerHTML=nf.length?nf.map(([k,f])=>'<div class="fd"><div class="dt"><b>'+AR(ymd(k)[2])+'</b><span>'+DAYS[dow(k)]+'</span></div><div class="sp"><b>'+esc(f.l)+'</b><div class="muted">'+hStr(hij(k))+(diffD(T,k)===1?' — بكرة':'')+'</div></div><button class="btn sm tog'+(S.plan[k]?' on':'')+'" data-plan="'+k+'">هصوم</button></div>').join(''):'<p class="muted">مفيش أيام صيام سنة قريبة حسب اختياراتك.</p>';
- $('#seasonCard').innerHTML=seasonCard(sea);
- $('#dhikrNow').innerHTML='<div class="tx" style="font-family:Amiri;font-size:23px;line-height:1.9">'+DH[(Math.floor(Date.now()/36e5))%DH.length]+'</div><div class="muted" style="margin-top:6px">دوس عشان ذكر تاني</div>';
- tickHero()}
-function seasonCard(sea){const h=sea.h,p=pt(T),now=Date.now();let o='';
- if(sea.name==='ramadan'||sea.name==='last10'){const fasting=now<p.maghrib&&now>p.fajr;const tgt=fasting?p.maghrib:(now<p.fajr?p.fajr:pt(addD(T,1)).fajr);
-  o+='<div class="card field"><div class="row"><span class="pill g">'+AR(h.d)+' رمضان</span>'+(sea.preview?'<span class="pill">معاينة</span>':'')+'</div><p class="muted" style="margin:10px 0 0">'+(fasting?'فاضل على الإفطار':'فاضل على الفجر (آخر وقت للسحور)')+'</p><div class="big" id="ramCd" data-t="'+tgt+'">—</div><div class="muted">الإفطار '+fmtT(p.maghrib)+' • الفجر '+fmtT(pt(addD(T,1)).fajr)+'</div>'+
-   '<p class="dua">'+(sea.name==='last10'?QADR:IFTAR)+'</p>'+(sea.name==='last10'?'<p class="muted">الليالي الوترية: '+[21,23,25,27,29].map(n=>'<span class="pill'+(h.d+1===n?' g':'')+'">'+AR(n)+'</span>').join(' ')+(h.d%2===0?' — الليلة دي ليلة '+AR(h.d+1)+' وترية، اجتهد':'')+'</p>':'')+'</div>';
-  o+='<div class="card"><h3>ختمة رمضان</h3><p class="muted">ختمة في رمضان = '+AR(20)+' صفحة (جزء) في اليوم.</p><div class="row"><button class="btn sm" data-kh="1">خلّي هدفي ختمة</button><button class="btn sm ghost" data-kh="2">ختمتين</button></div></div>'}
- else if(sea.name==='eid'){o+='<div class="card field"><h2 style="color:var(--hl)">عيد مبارك</h2><p class="dua">'+TAKBIR+'</p><p class="muted">تقبّل الله منّا ومنكم</p></div>'}
- if(sea.prep||(sea.name==='normal'&&daysToRamadan(T)!==null&&daysToRamadan(T)<=60)){const d=sea.preview?10:daysToRamadan(T);
-  o+='<div class="card field"><p class="muted" style="margin:0">فاضل على رمضان</p><div class="big">'+AR(d)+' يوم</div><p class="muted">جهّز نفسك: اقضي اللي عليك، وظبّط وردك عشان توصل رمضان وانت متعوّد.</p>'+(S.qada>0?'<p><span class="pill g">عليك '+AR(S.qada)+' يوم قضاء</span></p>':'')+'</div>'}
- const h0=hij(T);if(h0.m===10&&h0.d>=2&&S.shawwal<6)o+='<div class="card"><h3>الست من شوال</h3><p class="muted">صمت '+AR(S.shawwal)+' من ٦</p><div class="bar"><i style="width:'+(S.shawwal/6*100)+'%"></i></div></div>';
- if(h0.m===12&&h0.d<=9)o+='<div class="card field"><h3 style="color:var(--hl)">العشر من ذي الحجة</h3><p class="muted">أعظم أيام الدنيا: أكثر من التكبير والتهليل، وصيام يوم عرفة يكفّر سنتين.</p></div>';
- if(sea.name==='normal'&&h0.d>=13&&h0.d<=15&&!sea.preview)o+='<div class="card"><h3>النهارده من الأيام البيض</h3><p class="muted">'+AR(h0.d)+' '+HM[h0.m-1]+' — صيام ٣ أيام من كل شهر مثل صيام الدهر.</p></div>';
- return o}
-function tickHero(){const now=Date.now();const nx=nextPrayer(now);if(!nx)return;
- $('#nextName').textContent=PN[nx.n];$('#nextLbl').textContent=nx.n==='sunrise'?'الشروق بعد':'الصلاة الجاية — '+fmtT(nx.t);
- $('#nextCd').textContent=cd(nx.t-now);const r=$('#ramCd');if(r)r.textContent=cd(+r.dataset.t-now)}
-const cd=ms=>{ms=Math.max(0,ms);const s=Math.floor(ms/1e3),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return AR(h)+':'+String(m).padStart(2,'0').replace(/\d/g,d=>AR(d))+':'+String(x).padStart(2,'0').replace(/\d/g,d=>AR(d))};
-function drawSky(name){const night=name!=='normal'&&name!=='eid';const sky=$('#sky');const g='rgba(255,255,255,.17)',d='var(--bg)';
- let s='<defs><symbol id="lan" viewBox="0 0 20 44"><path d="M10 0v8" stroke="var(--hl)" stroke-width="1"/><path d="M6 8h8l2 6-2 20H6L4 14z" fill="var(--hl)"/><path d="M7 14h6l-1 16H8z" fill="#fff6d6" opacity=".9"/><path d="M6 34h8l-2 5H8z" fill="var(--hl)"/></symbol>'+
-  '<symbol id="mn" viewBox="0 0 16 100"><path d="M8 0l3 10H5z" fill="currentColor"/><rect x="5" y="10" width="6" height="12" fill="currentColor"/><rect x="3" y="22" width="10" height="4" fill="currentColor"/><rect x="5" y="26" width="6" height="74" fill="currentColor"/></symbol>'+
-  '<mask id="skm"><rect width="400" height="120" fill="#fff"/><circle cx="70" cy="29" r="14" fill="#000"/></mask></defs>';
- if(night)for(let i=0;i<26;i++){const x=(i*61)%400,y=6+(i*37)%60;s+='<circle cx="'+x+'" cy="'+y+'" r="'+(i%3?0.8:1.4)+'" fill="#fff" opacity="'+(.4+(i%4)*.15)+'"/>'}
- s+='<circle cx="62" cy="34" r="16" fill="var(--hl)" opacity=".95" mask="url(#skm)"/>';
- s+='<g style="color:'+g+'"><use href="#mn" x="96" y="18" width="16" height="100"/><use href="#mn" x="288" y="18" width="16" height="100"/><path d="M150 120V86c0-26 22-44 50-52 28 8 50 26 50 52v34z" fill="'+g+'"/><path d="M118 120v-22c0-12 10-20 22-24 12 4 22 12 22 24v22zM238 120v-22c0-12 10-20 22-24 12 4 22 12 22 24v22z" fill="'+g+'"/><path d="M198 22h4l-2-10z" fill="'+g+'"/></g>';
- s+='<path d="M0 120V108c40-6 80-6 120 0 40 6 80 6 160 0 40-4 80-4 120 0v12z" fill="'+d+'"/>';
- if(name==='ramadan'||name==='last10'){s+='<path d="M0 0Q100 26 200 6T400 4" stroke="var(--hl)" stroke-width=".8" fill="none" opacity=".7"/>';[[40,10],[120,16],[200,6],[280,10],[360,6]].forEach(([x,y],i)=>{s+='<use href="#lan" x="'+(x-8)+'" y="'+y+'" width="16" height="'+(36+(i%2)*8)+'"/>'})}
- if(name==='eid')[[30,20],[90,50],[150,14],[250,40],[330,18],[380,52]].forEach(([x,y],i)=>{s+='<rect x="'+x+'" y="'+y+'" width="5" height="5" fill="'+(i%2?'#fff':'var(--hl)')+'" transform="rotate('+(i*30)+' '+x+' '+y+')" opacity=".8"/>'});
- sky.innerHTML=s}
-
 /* ================= RENDER: AZKAR ================= */
 let azTab='m';
 function azCount(t){const st=(S.az[T]||{})[t]||{};const l=AZ[t].l;let d=0;l.forEach((z,i)=>{if((st[i]||0)>=z[1])d++});return AR(d)+' من '+AR(l.length)}
@@ -314,7 +263,7 @@ function renderQ(){const W=S.wird,w=wird();const pct=W.page/TOTAL*100;const np=M
  days.forEach(k=>{const v=W.log[k]||0;hist+='<i class="'+(v?'':'z0')+'" style="height:'+(v?Math.max(6,v/mx*100):3)+'%"></i>';lab+='<span>'+(k===T?'النهارده':AR(ymd(k)[2]))+'</span>'});
  const finTxt=w.fin?('بمعدلك ده ('+AR(Math.round(w.avg*10)/10)+' صفحة في اليوم) هتختم يوم '+fmtG(w.fin,{day:'numeric',month:'long'})+(w.fin<=w.end?' — قبل هدفك':' — بعد هدفك بـ'+AR(diffD(w.end,w.fin))+' يوم')):'ابدأ وردك النهارده وأنا أحسبلك هتختم إمتى';
  const hd=pickH('quran',0);
- $('#qBody').innerHTML='<div class="card sec"><div class="qhead"><div class="ring" style="--p:'+pct+'"><div><b>'+AR(Math.round(pct))+'٪</b><span class="muted">'+AR(W.page)+' / '+AR(TOTAL)+'</span></div></div>'+
+ $('#qBody').innerHTML='<div class="card sec field"><div class="row"><div class="sp"><b>المصحف</b><div class="muted">كمّل من صفحة '+AR(Math.min(TOTAL,W.page+1))+' — الورد بيتحسب وانت بتقلّب</div></div><button class="btn blue" data-f="mushaf">افتح المصحف</button></div></div><div class="card"><div class="qhead"><div class="ring" style="--p:'+pct+'"><div><b>'+AR(Math.round(pct))+'٪</b><span class="muted">'+AR(W.page)+' / '+AR(TOTAL)+'</span></div></div>'+
   '<div><h3>ورد النهارده</h3><div class="big" style="margin:4px 0">'+AR(Math.min(w.done,w.target))+' / '+AR(w.target)+'</div><p class="muted" style="margin:0">من صفحة '+AR(w.from)+' (سورة '+SURAH[surahAt(w.from)]+') لصفحة '+AR(w.to)+'</p>'+(w.ok?'<p><span class="pill g">خلّصت وردك — بارك الله فيك</span></p>':'')+'</div></div>'+
   '<div class="row" style="margin-top:14px"><button class="btn" data-pg="1">قريت صفحة</button><button class="btn blue" data-pg="w">قريت الورد كله</button><button class="btn ghost" data-pg="-1">تراجع</button></div>'+
   '<div class="row" style="margin-top:10px"><label for="pgTo" class="muted">أو وصلت لحد صفحة:</label><input type="number" id="pgTo" min="0" max="604" inputmode="numeric" value="'+W.page+'"><button class="btn sm ghost" id="pgSet">حفظ</button></div>'+
@@ -381,8 +330,8 @@ function renderS(){const N=S.n;const P=NATIVE?{permission:'granted'}:window.Noti
 
 /* ================= NAV & EVENTS ================= */
 let cur='home';
-function go(v){cur=v;document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));render(v);window.scrollTo(0,0)}
-function render(v){({home:renderHome,azkar:renderAz,quran:renderQ,fast:renderF,set:renderS})[v]()}
+function go(v){if(v!=='page')stopCompass();cur=v;document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v||(v==='set'||v==='page')&&b.dataset.v==='more'));render(v);window.scrollTo(0,0)}
+function render(v){({home:renderHome,azkar:renderAz,quran:renderQ,fast:renderF,set:renderS,more:renderMore,page:renderPage})[v]()}
 function renderAll(){document.documentElement.dataset.season=seasonOf(T).name;render(cur);renderPop()}
 $('#nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)});
 function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
@@ -392,8 +341,13 @@ function testItem(adhanToo){const hd=pickH('sadaqa',Date.now()/1e3);return{id:77
 
 document.body.addEventListener('click',e=>{const b=e.target.closest('button,[data-p]');if(!b||b.closest('#pop')||b.closest('#softToast'))return;const d=b.dataset;
  if(b.id==='permBtn')return askPerm();
+ if(d.f)return openF(d.f);
+ if(b.id==='dayPrev'){viewOff--;return renderHome()}if(b.id==='dayNext'){viewOff++;return renderHome()}
+ if(b.id==='shareTimes'){const VK=addD(T,viewOff),p=pt(VK);return shareText('مواقيت الصلاة — '+S.loc.name+'\n'+fmtG(VK,{weekday:'long',day:'numeric',month:'long'})+' — '+hStr(hij(VK))+'\n'+['fajr','sunrise','dhuhr','asr','maghrib','isha'].map(n=>PN[n]+': '+fmtT(p[n])).join('\n')+'\n\nمن تطبيق ذِكْر')}
+ if(d.t&&d.t.startsWith('d:')){const dd=S.deeds[T]=S.deeds[T]||{};const id=d.t.slice(2);dd[id]=!dd[id];save();if(dd[id])toast('تقبّل الله');return renderHome()}
  if(b.id==='cityBtn')return go('set');
  if(d.open){Z&&Z.open({what:d.open});natSt=null;setTimeout(()=>{if(cur==='set')renderS()},1500);return}
+ if(d.p&&viewOff){toast('تقدر تعلّم صلاة النهارده بس');return}
  if(d.p){const pr=S.prayed[T]=S.prayed[T]||{};if(d.p==='sunrise')return;pr[d.p]=pr[d.p]?0:1;save();if(pr[d.p])toast('تقبّل الله');return renderHome()}
  if(d.t){if(d.t==='m'||d.t==='e'){azTab=d.t;return go('azkar')}if(d.t==='q')return go('quran');
    if(d.t==='s'){S.sadaqa[T]=S.sadaqa[T]?0:1;if(S.sadaqa[T]){ackKind('sadaqa',T);toast('تقبّل الله منك')}save();return renderHome()}
@@ -438,6 +392,8 @@ document.body.addEventListener('change',e=>{const t=e.target,d=t.dataset;
  if(t.id==='qSurah'&&t.value!==''){S.wird.page=SP[+t.value]-1;S.wird.start=T;save();toast('هتبدأ من سورة '+SURAH[+t.value]);return renderQ()}
 });
 
+/*HOMEJS*/
+/*FEATURES*/
 /* ================= BOOT ================= */
 const qs=new URLSearchParams(location.search);if(qs.get('ack')){S.ack[qs.get('ack')]=Date.now();save()}
 if(qs.get('go'))cur=qs.get('go');
