@@ -1,0 +1,7 @@
+{
+  "appId": "com.besoft.zikr",
+  "appName": "ذِكْر",
+  "webDir": "dist",
+  "android": { "allowMixedContent": false },
+  "plugins": { "LocalNotifications": { "iconColor": "#0b5d4b" } }
+}
